@@ -1,0 +1,2054 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TGAT2 มิติสัมพันธ์</title>
+
+<style>
+:root {
+  --blue:#0080ff;
+  --blue-dark:#0063d1;
+  --blue-light:#eef6ff;
+  --ink:#1a2438;
+  --muted:#56617a;
+  --line:#e4eaf4;
+  --green:#16a34a;
+  --red:#e5484d;
+  --shadow:0 2px 6px #1237780f,
+           0 14px 32px -14px #12377835;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  padding:16px;
+  background:transparent;
+  color:var(--ink);
+  font-family:"Noto Sans Thai",Tahoma,Arial,sans-serif;
+  font-size:14px;
+}
+
+button,input { font:inherit; }
+
+button {
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+.face:focus-visible {
+  outline:3px solid #91c8ff;
+  outline-offset:3px;
+}
+
+.shell {
+  width:100%;
+  max-width:860px;
+  margin:0 auto;
+  padding:22px;
+  border:1px solid #e8effa;
+  border-radius:24px;
+  background:
+    radial-gradient(100% 55% at 100% 0%,#eef6ff,transparent 65%),
+    radial-gradient(90% 50% at 0% 100%,#f4f9ff,transparent 65%),
+    #fff;
+}
+
+/* HEADER */
+
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.eyebrow {
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin-bottom:8px;
+  color:var(--blue);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.eyebrow::before {
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--blue);
+}
+
+.header h1 {
+  margin:0 0 6px;
+  font-size:29px;
+  font-weight:800;
+}
+
+.header p {
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.7;
+}
+
+.help-btn {
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:10px 14px;
+  border:1px solid #cfe0f8;
+  border-radius:999px;
+  background:#fff;
+  color:var(--blue-dark);
+  font-weight:700;
+  box-shadow:0 2px 8px #1237780d;
+}
+
+.help-btn:hover {
+  background:var(--blue-light);
+}
+
+.help-symbol {
+  display:grid;
+  place-items:center;
+  width:21px;
+  height:21px;
+  border:1.5px solid currentColor;
+  border-radius:50%;
+  font-size:12px;
+}
+
+/* CARDS */
+
+.card {
+  min-width:0;
+  padding:17px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:#fff;
+  box-shadow:var(--shadow);
+}
+
+.card-title {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0;
+  font-size:17px;
+  font-weight:800;
+}
+
+.card-title::before {
+  content:"";
+  flex-shrink:0;
+  width:4px;
+  height:21px;
+  border-radius:6px;
+  background:linear-gradient(var(--blue),var(--blue-dark));
+}
+
+.model-head {
+  margin-bottom:13px;
+}
+
+/* MODEL STAGE */
+
+.stage {
+  position:relative;
+  height:365px;
+  overflow:hidden;
+  perspective:1100px;
+  border:1px solid #7fb8e6;
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 50% 0%,#ffffff55,transparent 45%),
+    linear-gradient(160deg,#6cbdf2 0%,#93d2f7 100%);
+  user-select:none;
+  touch-action:manipulation;
+}
+
+.stage::before,
+.stage::after {
+  content:"";
+  position:absolute;
+  border:2px solid #ffffff30;
+  pointer-events:none;
+}
+
+.stage::before {
+  width:180px;
+  height:180px;
+  top:-92px;
+  right:-55px;
+  border-radius:32px;
+  transform:rotate(30deg);
+}
+
+.stage::after {
+  width:130px;
+  height:130px;
+  bottom:-85px;
+  left:-38px;
+  border-radius:50%;
+}
+
+.stage-grid {
+  --grid-size:64px;
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.38;
+  background-image:
+    linear-gradient(#ffffff66 1px,transparent 1px),
+    linear-gradient(90deg,#ffffff66 1px,transparent 1px);
+  background-size:var(--grid-size) var(--grid-size);
+  background-position:center;
+}
+
+.stage-footer {
+  position:absolute;
+  z-index:2;
+  bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+  max-width:92%;
+  padding:7px 15px;
+  border:1px solid #ffffffb5;
+  border-radius:999px;
+  background:#ffffffe8;
+  color:#475b77;
+  font-size:12px;
+  text-align:center;
+  white-space:nowrap;
+  pointer-events:none;
+  backdrop-filter:blur(8px);
+}
+
+/* 3D MODEL */
+
+.world {
+  position:absolute;
+  left:50%;
+  top:48%;
+  width:0;
+  height:0;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+
+.cube {
+  position:absolute;
+  width:64px;
+  height:64px;
+  margin-left:-32px;
+  margin-top:-32px;
+  transform-style:preserve-3d;
+}
+
+.face {
+  position:absolute;
+  width:64px;
+  height:64px;
+  border:1.8px solid #17233a;
+  border-radius:2px;
+  backface-visibility:hidden;
+  cursor:pointer;
+  box-shadow:inset 0 1px 0 #ffffff50;
+}
+
+.face.front {
+  transform:translateZ(32px);
+}
+
+.face.back {
+  transform:rotateY(180deg) translateZ(32px);
+}
+
+.face.right {
+  transform:rotateY(90deg) translateZ(32px);
+}
+
+.face.left {
+  transform:rotateY(-90deg) translateZ(32px);
+}
+
+.face.top {
+  transform:rotateX(90deg) translateZ(32px);
+}
+
+.face.bottom {
+  transform:rotateX(-90deg) translateZ(32px);
+}
+
+.cube.selected .face {
+  border:2px solid var(--blue);
+  box-shadow:inset 0 0 0 2px #0080ff55;
+}
+
+.face.shaded {
+  background-image:repeating-linear-gradient(
+    45deg,#0008 0 2px,transparent 2px 7px
+  );
+  background-blend-mode:multiply;
+}
+
+.face.black {
+  background:#000!important;
+}
+
+/* QUICK MARK MENU */
+
+.quick-menu {
+  position:absolute;
+  z-index:20;
+  width:275px;
+  padding:13px;
+  border:1px solid #d7e7fa;
+  border-radius:15px;
+  background:#fffffff5;
+  box-shadow:0 12px 35px #12377840;
+  backdrop-filter:blur(10px);
+}
+
+.quick-menu[hidden] {
+  display:none;
+}
+
+.quick-menu strong {
+  display:block;
+  margin-bottom:10px;
+  font-size:13px;
+}
+
+.quick-actions {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+}
+
+.quick-actions button {
+  min-height:40px;
+  padding:7px 3px;
+  border:1px solid #dbe7f6;
+  border-radius:10px;
+  background:#f4f8ff;
+  font-size:12px;
+  font-weight:700;
+}
+
+.quick-actions button:hover {
+  border-color:var(--blue);
+  background:var(--blue-light);
+}
+
+.message {
+  min-height:43px;
+  margin-top:12px;
+  padding:10px 13px;
+  border:1px solid #dbeafe;
+  border-radius:12px;
+  background:#f0f7ff;
+  color:#416080;
+  font-size:13px;
+  line-height:1.6;
+}
+
+/* LOWER CONTROLS */
+
+.controls-grid {
+  display:grid;
+  grid-template-columns:280px minmax(0,1fr);
+  gap:15px;
+  align-items:start;
+  margin-top:16px;
+}
+
+.control-caption {
+  margin:15px 0 8px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+
+.tool-buttons {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+}
+
+.tool-button {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:5px;
+  min-width:0;
+  min-height:64px;
+  padding:7px 4px;
+  border:1px solid #dfe8f5;
+  border-radius:12px;
+  background:#f6f9ff;
+  color:#52617b;
+  font-size:12px;
+  font-weight:700;
+}
+
+.tool-visual {
+  display:grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  border:1.5px solid currentColor;
+  border-radius:8px;
+  font-size:17px;
+  font-weight:700;
+  line-height:1;
+}
+
+.tool-button.active {
+  border-color:var(--blue);
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 6px 15px #0080ff40;
+}
+
+#addMode.active {
+  border-color:var(--green);
+  background:var(--green);
+  box-shadow:0 6px 15px #16a34a25;
+}
+
+#deleteMode.active {
+  border-color:var(--red);
+  background:var(--red);
+  box-shadow:0 6px 15px #e5484d25;
+}
+
+.tool-button:hover:not(.active) {
+  border-color:#91c8ff;
+  background:var(--blue-light);
+}
+
+/* COLORS */
+
+.palette {
+  display:flex;
+  flex-wrap:wrap;
+  gap:11px;
+  padding:5px;
+}
+
+.color-choice {
+  flex:0 0 35px;
+  width:35px;
+  height:35px;
+  padding:0;
+  border:2px solid #dce5f1;
+  border-radius:50%;
+  background:var(--swatch);
+  transition:transform .15s,box-shadow .15s;
+}
+
+.color-choice:hover {
+  transform:scale(1.07);
+}
+
+.color-choice.active {
+  border-color:var(--blue-dark);
+  box-shadow:0 0 0 3px #fff,0 0 0 5px var(--blue);
+}
+
+.selected-color {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.color-preview {
+  width:17px;
+  height:17px;
+  border:1px solid #c5cedd;
+  border-radius:50%;
+}
+
+.selected-color strong {
+  color:var(--ink);
+}
+
+.reset-all {
+  width:100%;
+  min-height:40px;
+  margin-top:17px;
+  border:1px solid #e5eaf3;
+  border-radius:999px;
+  background:#f1f5fb;
+  color:#52617b;
+  font-size:13px;
+  font-weight:700;
+}
+
+.reset-all:hover {
+  background:#ffeef0;
+  color:#c92f37;
+}
+
+/* XYZ ROTATION */
+
+.rotation-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:9px;
+  margin-bottom:10px;
+}
+
+.reset-view {
+  flex-shrink:0;
+  padding:7px 12px;
+  border:1px solid #d5e5f8;
+  border-radius:999px;
+  background:var(--blue-light);
+  color:var(--blue-dark);
+  font-size:11px;
+  font-weight:700;
+}
+
+.reset-view:hover {
+  background:#dceeff;
+}
+
+.rotation-subtitle {
+  margin:0 0 11px 13px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.axis-row {
+  --axis-color:var(--blue);
+  margin-top:9px;
+  padding:11px 12px;
+  border:1px solid #e8edf6;
+  border-radius:13px;
+  background:#f8faff;
+}
+
+.axis-y {
+  --axis-color:#be8b00;
+}
+
+.axis-z {
+  --axis-color:#dc4651;
+}
+
+.axis-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.axis-name {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.axis-letter {
+  display:grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  border-radius:8px;
+  background:var(--axis-color);
+  color:#fff;
+  font-size:12px;
+  font-weight:800;
+}
+
+.axis-description {
+  color:var(--muted);
+  font-size:11px;
+  font-weight:400;
+}
+
+.axis-output {
+  padding:2px 9px;
+  border-radius:8px;
+  background:#fff;
+  color:var(--axis-color);
+  font-size:14px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+
+.axis-controls {
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr) 52px;
+  gap:10px;
+  align-items:center;
+}
+
+.axis-step {
+  min-height:34px;
+  padding:5px 3px;
+  border:1px solid #e0e8f3;
+  border-radius:9px;
+  background:#fff;
+  color:#52617b;
+  font-size:11px;
+  font-weight:800;
+}
+
+.axis-step:hover {
+  border-color:var(--axis-color);
+  color:var(--axis-color);
+}
+
+/* SLIDER */
+
+.axis-controls input[type="range"] {
+  --fill:50%;
+  appearance:none;
+  -webkit-appearance:none;
+  width:100%;
+  height:25px;
+  min-width:0;
+  padding:0;
+  margin:0;
+  background:transparent;
+  cursor:pointer;
+  touch-action:pan-x;
+}
+
+.axis-controls input[type="range"]::-webkit-slider-runnable-track {
+  height:7px;
+  border-radius:99px;
+  background:linear-gradient(
+    to right,
+    var(--axis-color) 0%,
+    var(--axis-color) var(--fill),
+    #dfe7f1 var(--fill),
+    #dfe7f1 100%
+  );
+}
+
+.axis-controls input[type="range"]::-webkit-slider-thumb {
+  appearance:none;
+  -webkit-appearance:none;
+  width:20px;
+  height:20px;
+  margin-top:-6.5px;
+  border:3px solid var(--axis-color);
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 2px 6px #12377830;
+}
+
+.axis-controls input[type="range"]::-moz-range-track {
+  height:7px;
+  border-radius:99px;
+  background:#dfe7f1;
+}
+
+.axis-controls input[type="range"]::-moz-range-progress {
+  height:7px;
+  border-radius:99px;
+  background:var(--axis-color);
+}
+
+.axis-controls input[type="range"]::-moz-range-thumb {
+  width:15px;
+  height:15px;
+  border:3px solid var(--axis-color);
+  border-radius:50%;
+  background:#fff;
+}
+
+.axis-ticks {
+  display:flex;
+  justify-content:space-between;
+  margin:5px 63px 0;
+  color:#9ba6b9;
+  font-size:9px;
+}
+
+/* HELP DIALOG */
+
+#helpDialog {
+  width:calc(100% - 28px);
+  max-width:650px;
+  max-height:85vh;
+  overflow-y:auto;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:#fff;
+  color:var(--ink);
+  box-shadow:0 24px 70px #12377850;
+  font:inherit;
+}
+
+#helpDialog::backdrop {
+  background:#0a193c80;
+}
+
+.help-dialog-title {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 17px;
+  color:var(--blue-dark);
+  font-size:22px;
+  font-weight:800;
+}
+
+.help-dialog-title::before {
+  content:"";
+  flex-shrink:0;
+  width:4px;
+  height:25px;
+  border-radius:99px;
+  background:var(--blue);
+}
+
+.help-list {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.help-item {
+  min-width:0;
+  padding:16px;
+  border:1px solid #dce8f8;
+  border-radius:14px;
+  background:#f7fbff;
+}
+
+.help-item-title {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 7px;
+  color:var(--blue-dark);
+  font-size:15px;
+  font-weight:800;
+}
+
+.help-item-title::before {
+  content:"";
+  flex-shrink:0;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--blue);
+}
+
+.help-item-text {
+  margin:0;
+  padding-left:14px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.75;
+}
+
+.help-item-rotate {
+  grid-column:1/-1;
+  border-color:#bcdcff;
+  background:#eef6ff;
+}
+
+.dialog-close {
+  display:block;
+  width:100%;
+  min-height:44px;
+  margin-top:18px;
+  padding:11px;
+  border:0;
+  border-radius:999px;
+  background:var(--blue);
+  color:#fff;
+  font-size:14px;
+  font-weight:800;
+}
+
+.dialog-close:hover {
+  background:var(--blue-dark);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:730px) {
+  .controls-grid {
+    grid-template-columns:1fr;
+  }
+
+  .stage {
+    height:350px;
+  }
+}
+
+@media(max-width:520px) {
+  .help-list {
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+
+  .help-item-rotate {
+    grid-column:auto;
+  }
+}
+
+@media(max-width:480px) {
+  body {
+    padding:8px;
+  }
+
+  .shell {
+    padding:12px;
+    border-radius:17px;
+  }
+
+  .header {
+    margin-bottom:14px;
+  }
+
+  .header h1 {
+    font-size:23px;
+  }
+
+  .header p {
+    font-size:12px;
+  }
+
+  .help-btn {
+    padding:8px;
+    font-size:12px;
+  }
+
+  .card {
+    padding:12px;
+    border-radius:16px;
+  }
+
+  .card-title {
+    font-size:16px;
+  }
+
+  .stage {
+    height:330px;
+  }
+
+  .stage-footer {
+    max-width:90%;
+    white-space:normal;
+    font-size:11px;
+  }
+
+  .controls-grid {
+    gap:11px;
+    margin-top:11px;
+  }
+
+  .axis-controls {
+    gap:6px;
+  }
+
+  .axis-row {
+    padding:9px;
+  }
+
+  .axis-description {
+    font-size:10px;
+  }
+
+  .axis-ticks {
+    margin-left:58px;
+    margin-right:58px;
+  }
+
+  #helpDialog {
+    padding:16px;
+  }
+
+  .help-dialog-title {
+    font-size:19px;
+  }
+
+  .help-item {
+    padding:12px;
+  }
+
+  .help-item-title {
+    font-size:14px;
+  }
+
+  .help-item-text {
+    font-size:12px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="shell">
+
+  <header class="header">
+    <div>
+      <div class="eyebrow">TGAT2 INTERACTIVE</div>
+      <h1>มิติสัมพันธ์</h1>
+      <p>
+        สร้างลูกบาศก์เพื่อทดลองหมุนรูปทรง
+        และฝึกมองภาพ 3 มิติ
+      </p>
+    </div>
+
+    <button id="openHelp" class="help-btn" type="button">
+      <span class="help-symbol">?</span>
+      วิธีเล่น
+    </button>
+  </header>
+
+  <section class="card">
+
+    <div class="model-head">
+      <h2 class="card-title">โมเดลลูกบาศก์ 3 มิติ</h2>
+    </div>
+
+    <div id="stage" class="stage">
+      <div id="stageGrid" class="stage-grid"></div>
+      <div id="world" class="world"></div>
+
+      <div id="quickMenu" class="quick-menu" hidden>
+        <strong>ทำเครื่องหมายลูกบาศก์</strong>
+        <div class="quick-actions">
+          <button type="button" data-mark="shade">แรเงา</button>
+          <button type="button" data-mark="black">สีดำ</button>
+          <button type="button" data-mark="clear">ล้าง</button>
+        </div>
+      </div>
+
+      <div class="stage-footer">
+        ปรับมุมมองด้วยแกน X / Y / Z ด้านล่าง
+      </div>
+    </div>
+
+    <div id="message" class="message"
+         role="status" aria-live="polite">
+      เลือกลูกบาศก์ที่ต้องการ
+      หรือเลือกเครื่องมือเพื่อเริ่มสร้างรูปทรง
+    </div>
+
+  </section>
+
+  <div class="controls-grid">
+
+    <section class="card">
+      <h2 class="card-title">เครื่องมือ</h2>
+
+      <p class="control-caption">
+        สร้างและแก้ไขลูกบาศก์
+      </p>
+
+      <div class="tool-buttons">
+        <button id="selectMode"
+                class="tool-button active"
+                type="button" aria-pressed="true">
+          <span class="tool-visual">□</span>
+          เลือก
+        </button>
+
+        <button id="addMode"
+                class="tool-button"
+                type="button" aria-pressed="false">
+          <span class="tool-visual">+</span>
+          เพิ่ม
+        </button>
+
+        <button id="deleteMode"
+                class="tool-button"
+                type="button" aria-pressed="false">
+          <span class="tool-visual">−</span>
+          ลบ
+        </button>
+      </div>
+
+      <p class="control-caption">เลือกสีลูกบาศก์</p>
+
+      <div class="palette">
+
+        <button class="color-choice active"
+                data-color="0"
+                style="--swatch:#ffffff"
+                aria-label="สีขาว"
+                title="ขาว"
+                type="button"></button>
+
+        <button class="color-choice"
+                data-color="1"
+                style="--swatch:#0080ff"
+                aria-label="สีน้ำเงิน"
+                title="น้ำเงิน"
+                type="button"></button>
+
+        <button class="color-choice"
+                data-color="2"
+                style="--swatch:#f9c817"
+                aria-label="สีเหลือง"
+                title="เหลือง"
+                type="button"></button>
+
+        <button class="color-choice"
+                data-color="3"
+                style="--swatch:#39bdff"
+                aria-label="สีฟ้า"
+                title="ฟ้า"
+                type="button"></button>
+
+        <button class="color-choice"
+                data-color="4"
+                style="--swatch:#ff0000"
+                aria-label="สีแดง"
+                title="แดง"
+                type="button"></button>
+      </div>
+
+      <div class="selected-color">
+        สีที่เลือก:
+        <span id="colorPreview" class="color-preview"></span>
+        <strong id="colorName">ขาว</strong>
+      </div>
+
+      <button id="resetAll" class="reset-all" type="button">
+        เริ่มใหม่ทั้งหมด
+      </button>
+    </section>
+
+    <section class="card">
+
+      <div class="rotation-head">
+        <h2 class="card-title">หมุนตามแกน XYZ</h2>
+        <button id="resetView" class="reset-view"
+                type="button">รีเซ็ต</button>
+      </div>
+
+      <p class="rotation-subtitle">
+        เลื่อนสไลเดอร์ หรือกดหมุนครั้งละ 90°
+      </p>
+
+      <div class="axis-row axis-x">
+        <div class="axis-heading">
+          <label class="axis-name" for="axisX">
+            <span class="axis-letter">X</span>
+            แกน X
+            <span class="axis-description">ก้ม / เงย</span>
+          </label>
+          <output id="axisXValue" for="axisX"
+                  class="axis-output">0°</output>
+        </div>
+        <div class="axis-controls">
+          <button class="axis-step"
+                  data-axis="x" data-delta="-90"
+                  type="button">−90°</button>
+          <input id="axisX" type="range"
+                 min="-180" max="180" step="1"
+                 value="0" aria-label="หมุนแกน X">
+          <button class="axis-step"
+                  data-axis="x" data-delta="90"
+                  type="button">+90°</button>
+        </div>
+        <div class="axis-ticks">
+          <span>−180°</span>
+          <span>−90°</span>
+          <span>0°</span>
+          <span>90°</span>
+          <span>180°</span>
+        </div>
+      </div>
+
+      <div class="axis-row axis-y">
+        <div class="axis-heading">
+          <label class="axis-name" for="axisY">
+            <span class="axis-letter">Y</span>
+            แกน Y
+            <span class="axis-description">ซ้าย / ขวา</span>
+          </label>
+          <output id="axisYValue" for="axisY"
+                  class="axis-output">0°</output>
+        </div>
+        <div class="axis-controls">
+          <button class="axis-step"
+                  data-axis="y" data-delta="-90"
+                  type="button">−90°</button>
+          <input id="axisY" type="range"
+                 min="-180" max="180" step="1"
+                 value="0" aria-label="หมุนแกน Y">
+          <button class="axis-step"
+                  data-axis="y" data-delta="90"
+                  type="button">+90°</button>
+        </div>
+        <div class="axis-ticks">
+          <span>−180°</span>
+          <span>−90°</span>
+          <span>0°</span>
+          <span>90°</span>
+          <span>180°</span>
+        </div>
+      </div>
+
+      <div class="axis-row axis-z">
+        <div class="axis-heading">
+          <label class="axis-name" for="axisZ">
+            <span class="axis-letter">Z</span>
+            แกน Z
+            <span class="axis-description">หมุนเอียง</span>
+          </label>
+          <output id="axisZValue" for="axisZ"
+                  class="axis-output">0°</output>
+        </div>
+        <div class="axis-controls">
+          <button class="axis-step"
+                  data-axis="z" data-delta="-90"
+                  type="button">−90°</button>
+          <input id="axisZ" type="range"
+                 min="-180" max="180" step="1"
+                 value="0" aria-label="หมุนแกน Z">
+          <button class="axis-step"
+                  data-axis="z" data-delta="90"
+                  type="button">+90°</button>
+        </div>
+        <div class="axis-ticks">
+          <span>−180°</span>
+          <span>−90°</span>
+          <span>0°</span>
+          <span>90°</span>
+          <span>180°</span>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+<!-- HELP DIALOG -->
+
+<dialog id="helpDialog">
+  <h2 class="help-dialog-title">
+    วิธีเล่น TGAT2 มิติสัมพันธ์
+  </h2>
+
+  <div class="help-list">
+
+    <section class="help-item">
+      <h3 class="help-item-title">เลือก</h3>
+      <p class="help-item-text">
+        เลือกลูกบาศก์ที่ต้องการเพื่อเปลี่ยนสี
+      </p>
+    </section>
+
+    <section class="help-item">
+      <h3 class="help-item-title">เพิ่ม</h3>
+      <p class="help-item-text">
+        กดเพิ่มและคลิกด้านที่ต้องการเพื่อต่อลูกบาศก์ก้อนใหม่
+      </p>
+    </section>
+
+    <section class="help-item">
+      <h3 class="help-item-title">ลบ</h3>
+      <p class="help-item-text">
+        กดลบและคลิกลูกบาศก์ที่ต้องการลบ
+      </p>
+    </section>
+
+    <section class="help-item">
+      <h3 class="help-item-title">แรเงา / สีดำ</h3>
+      <p class="help-item-text">
+        ดับเบิลคลิกที่ลูกบาศก์เพื่อเปิดเมนูทำเครื่องหมายแรเงาหรือเปลี่ยนเป็นสีดำ
+      </p>
+    </section>
+
+    <section class="help-item help-item-rotate">
+      <h3 class="help-item-title">หมุน</h3>
+      <p class="help-item-text">
+        เลื่อนสไลเดอร์แกน X, Y, Z หรือกดปุ่ม ±90° เพื่อหมุนลูกบาศก์
+      </p>
+    </section>
+
+  </div>
+
+  <button id="closeHelp"
+          class="dialog-close"
+          type="button">ปิด</button>
+</dialog>
+
+<script>
+"use strict";
+
+/* CONFIG */
+
+const SIZE = 64;
+const MAX_CUBES = 50;
+
+const palettes = [
+  {
+    name:"ขาว",
+    base:"#ffffff",
+    front:"#ffffff",
+    side:"#f4f4f5",
+    top:"#ffffff",
+    bottom:"#d0d1d2"
+  },
+  {
+    name:"น้ำเงิน",
+    base:"#0080ff",
+    front:"#2e97ff",
+    side:"#0080ff",
+    top:"#5eafff",
+    bottom:"#006dd9"
+  },
+  {
+    name:"เหลือง",
+    base:"#f9c817",
+    front:"#ffe41b",
+    side:"#f9c817",
+    top:"#fff146",
+    bottom:"#f6ad17"
+  },
+  {
+    name:"ฟ้า",
+    base:"#39bdff",
+    front:"#5dc9ff",
+    side:"#39bdff",
+    top:"#82d5ff",
+    bottom:"#30a1d9"
+  },
+  {
+    name:"แดง",
+    base:"#ff0000",
+    front:"#ff3333",
+    side:"#ff0000",
+    top:"#ff5454",
+    bottom:"#d61f1f"
+  }
+];
+
+const directions = {
+  front:{x:0,y:0,z:1},
+  back:{x:0,y:0,z:-1},
+  right:{x:1,y:0,z:0},
+  left:{x:-1,y:0,z:0},
+  top:{x:0,y:1,z:0},
+  bottom:{x:0,y:-1,z:0}
+};
+
+const stage = document.getElementById("stage");
+const stageGrid = document.getElementById("stageGrid");
+const world = document.getElementById("world");
+const message = document.getElementById("message");
+const quickMenu = document.getElementById("quickMenu");
+
+const initialCubes = () => [
+  {x:0,y:0,z:0,color:0,mark:null},
+  {x:1,y:0,z:0,color:0,mark:null},
+  {x:0,y:1,z:0,color:0,mark:null},
+  {x:0,y:0,z:1,color:0,mark:null}
+];
+
+let cubes = initialCubes();
+let mode = "select";
+let selectedKey = null;
+let selectedColor = 0;
+let lastTap = {key:null,time:0};
+
+const keyOf = (x,y,z) => `${x},${y},${z}`;
+
+function findCube(x,y,z) {
+  return cubes.find(c =>
+    c.x === x &&
+    c.y === y &&
+    c.z === z
+  );
+}
+
+function hasCube(x,y,z) {
+  return Boolean(findCube(x,y,z));
+}
+
+function getSelectedCube() {
+  return cubes.find(c =>
+    keyOf(c.x,c.y,c.z) === selectedKey
+  );
+}
+
+function setMessage(text) {
+  message.textContent = text;
+}
+
+/* QUATERNION */
+
+function quatAxis(axis,degrees) {
+  const half = degrees*Math.PI/360;
+  const s = Math.sin(half);
+
+  return {
+    w:Math.cos(half),
+    x:axis==="x" ? s : 0,
+    y:axis==="y" ? s : 0,
+    z:axis==="z" ? s : 0
+  };
+}
+
+function quatMultiply(a,b) {
+  return {
+    w:a.w*b.w-a.x*b.x-a.y*b.y-a.z*b.z,
+    x:a.w*b.x+a.x*b.w+a.y*b.z-a.z*b.y,
+    y:a.w*b.y-a.x*b.z+a.y*b.w+a.z*b.x,
+    z:a.w*b.z+a.x*b.y-a.y*b.x+a.z*b.w
+  };
+}
+
+function quatNormalize(q) {
+  const n = Math.hypot(q.w,q.x,q.y,q.z);
+  if(n < 1e-12) return {w:1,x:0,y:0,z:0};
+
+  return {
+    w:q.w/n,
+    x:q.x/n,
+    y:q.y/n,
+    z:q.z/n
+  };
+}
+
+function quaternionFromAngles(a) {
+  const qx = quatAxis("x",a.x);
+  const qy = quatAxis("y",a.y);
+  const qz = quatAxis("z",a.z);
+
+  return quatNormalize(
+    quatMultiply(qz,quatMultiply(qy,qx))
+  );
+}
+
+function quaternionMatrix(q,scale) {
+  const {w,x,y,z} = q;
+  const s = scale;
+
+  return [
+    (1-2*(y*y+z*z))*s,
+    (2*(x*y+w*z))*s,
+    (2*(x*z-w*y))*s,
+    0,
+
+    (2*(x*y-w*z))*s,
+    (1-2*(x*x+z*z))*s,
+    (2*(y*z+w*x))*s,
+    0,
+
+    (2*(x*z+w*y))*s,
+    (2*(y*z-w*x))*s,
+    (1-2*(x*x+y*y))*s,
+    0,
+
+    0,0,0,1
+  ];
+}
+
+/* XYZ ANGLES */
+
+const DEFAULT_ANGLES = Object.freeze({
+  x:0,y:0,z:0
+});
+
+let visualAngles = {...DEFAULT_ANGLES};
+
+const axisInputs = {
+  x:document.getElementById("axisX"),
+  y:document.getElementById("axisY"),
+  z:document.getElementById("axisZ")
+};
+
+const axisOutputs = {
+  x:document.getElementById("axisXValue"),
+  y:document.getElementById("axisYValue"),
+  z:document.getElementById("axisZValue")
+};
+
+function normalizeDisplayAngle(value) {
+  let angle = ((Math.round(value)+180)%360+360)%360-180;
+
+  if(angle===-180 && value>0) {
+    angle=180;
+  }
+
+  return angle;
+}
+
+function updateAxisUI() {
+  for(const axis of ["x","y","z"]) {
+    const input=axisInputs[axis];
+    const angle=normalizeDisplayAngle(visualAngles[axis]);
+
+    input.value=String(angle);
+
+    input.style.setProperty(
+      "--fill",
+      `${(angle+180)/360*100}%`
+    );
+
+    axisOutputs[axis].textContent =
+      `${angle<0?"−":""}${Math.abs(angle)}°`;
+  }
+}
+
+/* MODEL SIZE */
+
+function getModelScale() {
+  if(!cubes.length) return 1;
+
+  const extent=axis=>{
+    const values=cubes.map(c=>c[axis]);
+    return (
+      Math.max(...values)-Math.min(...values)+1
+    )*SIZE;
+  };
+
+  const diagonal=Math.hypot(
+    extent("x"),
+    extent("y"),
+    extent("z")
+  );
+
+  const available=Math.min(
+    stage.clientWidth*.76,
+    stage.clientHeight*.76
+  );
+
+  if(diagonal<=0 || available<=0) return 1;
+
+  return Math.min(1,available/diagonal);
+}
+
+function drawRotation() {
+  const scale=getModelScale();
+  const q=quaternionFromAngles(visualAngles);
+  const matrix=quaternionMatrix(q,scale);
+
+  world.style.transform=`matrix3d(${matrix.join(",")})`;
+
+  stageGrid.style.setProperty(
+    "--grid-size",
+    `${SIZE*scale}px`
+  );
+}
+
+/* ROTATION ANIMATION */
+
+const animationQueue=[];
+let animation=null;
+
+const STEP_DURATION=280;
+const MAX_QUEUE=16;
+
+function cancelAnimation() {
+  if(animation) {
+    cancelAnimationFrame(animation.frame);
+    animation=null;
+  }
+
+  animationQueue.length=0;
+}
+
+function playNextAnimation() {
+  if(animation || !animationQueue.length) return;
+
+  const {axis,delta}=animationQueue.shift();
+  const from=visualAngles[axis];
+  const to=from+delta;
+
+  const reduceMotion=window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  if(reduceMotion) {
+    visualAngles[axis]=to;
+    drawRotation();
+    updateAxisUI();
+    playNextAnimation();
+    return;
+  }
+
+  const currentAnimation={frame:0};
+  animation=currentAnimation;
+  let startTime=null;
+
+  function frame(now) {
+    if(animation!==currentAnimation) return;
+    if(startTime===null) startTime=now;
+
+    const progress=Math.min(
+      1,
+      (now-startTime)/STEP_DURATION
+    );
+
+    const eased=progress*progress*(3-2*progress);
+
+    visualAngles[axis]=from+(to-from)*eased;
+
+    drawRotation();
+    updateAxisUI();
+
+    if(progress<1) {
+      currentAnimation.frame=requestAnimationFrame(frame);
+    } else {
+      visualAngles[axis]=to;
+      animation=null;
+
+      drawRotation();
+      updateAxisUI();
+      playNextAnimation();
+    }
+  }
+
+  currentAnimation.frame=requestAnimationFrame(frame);
+}
+
+function stepAxis(axis,delta) {
+  if(!["x","y","z"].includes(axis)) return;
+  if(![90,-90].includes(delta)) return;
+  if(animationQueue.length>=MAX_QUEUE) return;
+
+  animationQueue.push({axis,delta});
+  playNextAnimation();
+}
+
+function nearestEquivalent(angle,reference) {
+  return angle+
+    Math.round((reference-angle)/360)*360;
+}
+
+function setAxisFromSlider(axis,value) {
+  if(!["x","y","z"].includes(axis)) return;
+
+  const number=Number(value);
+  if(!Number.isFinite(number)) return;
+
+  cancelAnimation();
+
+  visualAngles[axis]=nearestEquivalent(
+    number,
+    visualAngles[axis]
+  );
+
+  drawRotation();
+  updateAxisUI();
+}
+
+function resetAxisView() {
+  cancelAnimation();
+
+  visualAngles={...DEFAULT_ANGLES};
+
+  drawRotation();
+  updateAxisUI();
+}
+
+for(const axis of ["x","y","z"]) {
+  axisInputs[axis].addEventListener("input",event=>{
+    setAxisFromSlider(axis,event.target.value);
+  });
+}
+
+document.querySelectorAll(".axis-step").forEach(button=>{
+  button.addEventListener("click",()=>{
+    stepAxis(
+      button.dataset.axis,
+      Number(button.dataset.delta)
+    );
+  });
+});
+
+document.getElementById("resetView")
+  .addEventListener("click",resetAxisView);
+
+/* MODEL GEOMETRY */
+
+function getCenter() {
+  const coord=axis=>{
+    const values=cubes.map(c=>c[axis]);
+
+    return (
+      Math.min(...values)+Math.max(...values)
+    )/2;
+  };
+
+  return {
+    x:coord("x"),
+    y:coord("y"),
+    z:coord("z")
+  };
+}
+
+function createFace(cube,name) {
+  const face=document.createElement("div");
+
+  face.className=`face ${name}`;
+  face.dataset.face=name;
+
+  face.tabIndex=0;
+  face.setAttribute("role","button");
+
+  face.setAttribute(
+    "aria-label",
+    `ลูกบาศก์ตำแหน่ง ${cube.x}, ${cube.y}, ${cube.z} ด้าน${name}`
+  );
+
+  const palette=palettes[cube.color];
+  let color=palette.front;
+
+  if(name==="top") {
+    color=palette.top;
+  } else if(name==="bottom") {
+    color=palette.bottom;
+  } else if(name==="right" || name==="left") {
+    color=palette.side;
+  }
+
+  face.style.backgroundColor=color;
+
+  if(cube.mark==="shade") {
+    face.classList.add("shaded");
+  }
+
+  if(cube.mark==="black") {
+    face.classList.add("black");
+  }
+
+  face.addEventListener("keydown",event=>{
+    if(event.key==="Enter" || event.key===" ") {
+      event.preventDefault();
+      face.click();
+    }
+  });
+
+  return face;
+}
+
+function renderCubes() {
+  const center=getCenter();
+  const fragment=document.createDocumentFragment();
+
+  for(const cube of cubes) {
+    const element=document.createElement("div");
+    const key=keyOf(cube.x,cube.y,cube.z);
+
+    element.className="cube";
+    element.dataset.key=key;
+
+    if(key===selectedKey) {
+      element.classList.add("selected");
+    }
+
+    const tx=(cube.x-center.x)*SIZE;
+    const ty=-(cube.y-center.y)*SIZE;
+    const tz=(cube.z-center.z)*SIZE;
+
+    element.style.transform=
+      `translate3d(${tx}px,${ty}px,${tz}px)`;
+
+    for(const [name,d] of Object.entries(directions)) {
+      if(!hasCube(
+        cube.x+d.x,
+        cube.y+d.y,
+        cube.z+d.z
+      )) {
+        element.appendChild(createFace(cube,name));
+      }
+    }
+
+    fragment.appendChild(element);
+  }
+
+  world.replaceChildren(fragment);
+  drawRotation();
+}
+
+function highlightSelection() {
+  world.querySelectorAll(".cube").forEach(element=>{
+    element.classList.toggle(
+      "selected",
+      element.dataset.key===selectedKey
+    );
+  });
+}
+
+/* TOOL MODES */
+
+function setMode(next) {
+  if(!["select","add","delete"].includes(next)) return;
+
+  mode=next;
+
+  const buttons={
+    select:document.getElementById("selectMode"),
+    add:document.getElementById("addMode"),
+    delete:document.getElementById("deleteMode")
+  };
+
+  for(const [name,button] of Object.entries(buttons)) {
+    const active=name===mode;
+
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",String(active));
+  }
+
+  quickMenu.hidden=true;
+  lastTap={key:null,time:0};
+
+  if(mode==="select") {
+    setMessage(
+      "คลิกลูกบาศก์เพื่อเลือก หรือดับเบิลคลิกเพื่อแรเงา / ทำสีดำ / ล้าง"
+    );
+  } else if(mode==="add") {
+    setMessage(
+      "คลิกด้านของลูกบาศก์เพื่อเพิ่มก้อนใหม่"
+    );
+  } else {
+    setMessage(
+      "คลิกลูกบาศก์ที่ต้องการลบ"
+    );
+  }
+}
+
+document.getElementById("selectMode")
+  .addEventListener("click",()=>setMode("select"));
+
+document.getElementById("addMode")
+  .addEventListener("click",()=>setMode("add"));
+
+document.getElementById("deleteMode")
+  .addEventListener("click",()=>setMode("delete"));
+
+/* COLOR PALETTE */
+
+function updatePaletteUI() {
+  document.querySelectorAll(".color-choice").forEach(button=>{
+    const active=
+      Number(button.dataset.color)===selectedColor;
+
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",String(active));
+  });
+
+  document.getElementById("colorPreview")
+    .style.background=palettes[selectedColor].base;
+
+  document.getElementById("colorName")
+    .textContent=palettes[selectedColor].name;
+}
+
+document.querySelectorAll(".color-choice").forEach(button=>{
+  button.addEventListener("click",()=>{
+    selectedColor=Number(button.dataset.color);
+
+    const cube=getSelectedCube();
+
+    if(mode==="select" && cube) {
+      cube.color=selectedColor;
+      cube.mark=null;
+
+      renderCubes();
+
+      setMessage(
+        `เปลี่ยนลูกบาศก์เป็นสี${palettes[selectedColor].name}แล้ว`
+      );
+    } else {
+      setMessage(
+        `เลือกสี${palettes[selectedColor].name} สำหรับลูกบาศก์ใหม่แล้ว`
+      );
+    }
+
+    updatePaletteUI();
+  });
+});
+
+/* SELECT */
+
+function selectCube(key) {
+  const cube=cubes.find(c=>
+    keyOf(c.x,c.y,c.z)===key
+  );
+
+  if(!cube) return;
+
+  selectedKey=key;
+  selectedColor=cube.color;
+
+  updatePaletteUI();
+  highlightSelection();
+
+  setMessage(
+    "เลือกลูกบาศก์แล้ว ดับเบิลคลิกเพื่อทำเครื่องหมายทั้งก้อน"
+  );
+}
+
+/* ADD */
+
+function addCubeFromFace(face) {
+  if(cubes.length>=MAX_CUBES) {
+    setMessage(
+      `เพิ่มลูกบาศก์ได้สูงสุด ${MAX_CUBES} ก้อน`
+    );
+    return;
+  }
+
+  const source=face.closest(".cube");
+  if(!source) return;
+
+  const cube=cubes.find(c=>
+    keyOf(c.x,c.y,c.z)===source.dataset.key
+  );
+
+  if(!cube) return;
+
+  const direction=directions[face.dataset.face];
+  if(!direction) return;
+
+  const x=cube.x+direction.x;
+  const y=cube.y+direction.y;
+  const z=cube.z+direction.z;
+
+  if(hasCube(x,y,z)) {
+    setMessage("ตำแหน่งนี้มีลูกบาศก์อยู่แล้ว");
+    return;
+  }
+
+  cubes.push({
+    x,y,z,
+    color:selectedColor,
+    mark:null
+  });
+
+  selectedKey=keyOf(x,y,z);
+
+  renderCubes();
+  setMessage("เพิ่มลูกบาศก์เรียบร้อยแล้ว");
+}
+
+/* DELETE */
+
+function deleteCubeFromFace(face) {
+  if(cubes.length<=1) {
+    setMessage("ต้องเหลือลูกบาศก์อย่างน้อย 1 ก้อน");
+    return;
+  }
+
+  const element=face.closest(".cube");
+  if(!element) return;
+
+  const key=element.dataset.key;
+
+  cubes=cubes.filter(c=>
+    keyOf(c.x,c.y,c.z)!==key
+  );
+
+  if(selectedKey===key) {
+    selectedKey=null;
+  }
+
+  quickMenu.hidden=true;
+
+  renderCubes();
+  setMessage("ลบลูกบาศก์เรียบร้อยแล้ว");
+}
+
+/* QUICK MENU */
+
+function openQuickMenu(clientX,clientY) {
+  if(!selectedKey) return;
+
+  quickMenu.hidden=false;
+
+  const rect=stage.getBoundingClientRect();
+  const width=Math.min(275,rect.width-20);
+
+  const left=Math.max(
+    10,
+    Math.min(
+      clientX-rect.left-width/2,
+      rect.width-width-10
+    )
+  );
+
+  const top=Math.max(
+    10,
+    Math.min(
+      clientY-rect.top+12,
+      rect.height-125
+    )
+  );
+
+  quickMenu.style.width=`${width}px`;
+  quickMenu.style.left=`${left}px`;
+  quickMenu.style.top=`${top}px`;
+}
+
+/* STAGE INTERACTION */
+
+stage.addEventListener("click",event=>{
+  if(event.target.closest("#quickMenu")) return;
+
+  const face=event.target.closest(".face");
+
+  if(!face) {
+    quickMenu.hidden=true;
+    selectedKey=null;
+    lastTap={key:null,time:0};
+
+    highlightSelection();
+    return;
+  }
+
+  const element=face.closest(".cube");
+  if(!element) return;
+
+  if(mode==="add") {
+    addCubeFromFace(face);
+    lastTap={key:null,time:0};
+    return;
+  }
+
+  if(mode==="delete") {
+    deleteCubeFromFace(face);
+    lastTap={key:null,time:0};
+    return;
+  }
+
+  const key=element.dataset.key;
+  const now=performance.now();
+
+  const doubleTap=
+    lastTap.key===key &&
+    now-lastTap.time<350;
+
+  selectCube(key);
+
+  if(doubleTap) {
+    openQuickMenu(event.clientX,event.clientY);
+    lastTap={key:null,time:0};
+  } else {
+    quickMenu.hidden=true;
+    lastTap={key,time:now};
+  }
+});
+
+/* FACE MARKS */
+
+document.querySelectorAll("[data-mark]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    const cube=getSelectedCube();
+    if(!cube) return;
+
+    const mark=button.dataset.mark;
+    if(!["shade","black","clear"].includes(mark)) return;
+
+    cube.mark=mark==="clear" ? null : mark;
+
+    quickMenu.hidden=true;
+    renderCubes();
+
+    const labels={
+      shade:"แรเงาทั้งลูกบาศก์แล้ว",
+      black:"ระบายสีดำทั้งลูกบาศก์แล้ว",
+      clear:"ล้างเครื่องหมายเรียบร้อยแล้ว"
+    };
+
+    setMessage(labels[mark]);
+  });
+});
+
+/* RESET ALL */
+
+document.getElementById("resetAll").addEventListener("click",()=>{
+  cubes=[
+    {x:0,y:0,z:0,color:0,mark:null}
+  ];
+
+  selectedKey=null;
+  selectedColor=0;
+  lastTap={key:null,time:0};
+  quickMenu.hidden=true;
+
+  resetAxisView();
+  updatePaletteUI();
+  setMode("select");
+  renderCubes();
+
+  setMessage("เริ่มใหม่จากลูกบาศก์ 1 ก้อนแล้ว");
+});
+
+/* HELP DIALOG */
+
+const helpDialog=document.getElementById("helpDialog");
+
+document.getElementById("openHelp").addEventListener("click",()=>{
+  if(!helpDialog.open) {
+    helpDialog.showModal();
+  }
+});
+
+document.getElementById("closeHelp").addEventListener("click",()=>{
+  helpDialog.close();
+});
+
+helpDialog.addEventListener("click",event=>{
+  if(event.target===helpDialog) {
+    helpDialog.close();
+  }
+});
+
+/* RESPONSIVE */
+
+if("ResizeObserver" in window) {
+  const observer=new ResizeObserver(()=>{
+    drawRotation();
+  });
+
+  observer.observe(stage);
+} else {
+  window.addEventListener("resize",drawRotation);
+}
+
+/* INITIALIZE */
+
+updatePaletteUI();
+updateAxisUI();
+renderCubes();
+setMode("select");
+
+</script>
+</body>
+</html>
